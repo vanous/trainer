@@ -566,6 +566,9 @@ int main()
 	noecho();
 	raw();
 	keypad(w, TRUE);
+	mousemask(ALL_MOUSE_EVENTS, NULL); //accept mouse events
+
+	MEVENT event;
 	init_calib(); //fill calibrations with 128s
 	draw_screen();//draw UI
 		/* main loop */
@@ -573,6 +576,63 @@ int main()
 		while (c!='q') {
 					c=wgetch(w);
 					switch (c) { //user input, single character
+
+			case KEY_MOUSE:
+			if(getmouse(&event) == OK)
+			{	/* When the user clicks left mouse button */
+				if(event.bstate & BUTTON1_CLICKED)
+				{	
+					#ifdef DEBUG
+					mvwprintw(w,20,1,"x: %02d, y: %02d",event.x,event.y);
+					#endif
+
+					if ((event.y-3)>=0 && (event.y-3)<8) //rows of the calibration table
+						{
+						if ((event.x-21) >=0 && (event.x-21)<18){//coluns of the calib table
+							
+							if (((event.x-21)%5)<3){ //get column
+								menu_c=(event.x-21)/5;	
+								menu_r=event.y-3;
+								draw_screen();
+								get_input(menu_r,menu_c,strr,calib[menu_r][menu_c]);
+							}
+
+						}
+						}
+				else if (event.y==12){ //row of command buttons
+						if ((event.x>0) && (event.x<11)){
+								get_input(menu_r,menu_c,strr,calib[menu_r][menu_c]);
+						} else if ((event.x>11) && (event.x<18)){
+							if (fixture){
+							nodelay(w,TRUE);
+							current_program=fixture;
+							program_step=1;
+							program_length=program[current_program][0][0];
+							}else{ //fixture not selected, show error
+							
+								mvwprintw(w,14,(45-strlen(fixtures_print[fixture]))/2, "%s", fixtures_print[fixture]);
+							}
+						} else if ((event.x>18) && (event.x<26)){
+							if (fixture){
+							nodelay(w,TRUE);
+							current_program=0;
+							program_step=1;
+							program_length=program[current_program][0][0];
+							}else{ //fixture not selected, show error
+							
+								mvwprintw(w,14,(45-strlen(fixtures_print[fixture]))/2, "%s", fixtures_print[fixture]);
+							}
+						} else if ((event.x>34) && (event.x<42)){
+							return 0;
+						}
+
+
+					}
+				}
+			}		
+			
+			break;
+
 
 					case KEY_HOME:
 					  menu_r=0;
