@@ -18,6 +18,25 @@
 #include <errno.h>
 #include <artnet/artnet.h>
 
+
+#include <string.h>
+#include <fcntl.h>
+#include <unistd.h>
+#include <termios.h>
+
+#define INFO 0x14
+#define PACKET_START 0xA5
+#define SEND_DMX 6
+#define STOP_DMX_RDM 8
+#define DMX_IN 4
+#define SNIFFER 0x34
+
+
+struct termios oldtio,newtio;
+unsigned char buffer[1024];
+int size;
+int fd;
+//#define ARTNET
 //#define DEBUG 
 
 int calib[8][4]; // calibration values
@@ -210,6 +229,62 @@ const char *c_temp[] = {
 };
 
 
+void dmxusb_open_port(){
+
+fd=open("/dev/ttyUSB0",O_RDWR | O_NOCTTY);
+	if (fd<0) {
+		//chyba otevreni portu
+		#ifdef DEBUG
+			printf("chyba otevreni portu");
+		#endif
+
+		}else{
+		
+		#ifdef DEBUG
+			printf("port ready\n");
+		#endif
+		tcgetattr(fd,&oldtio);
+        memset(&newtio,0,sizeof(newtio));
+        newtio.c_iflag=0;
+        newtio.c_oflag=~OPOST;
+        newtio.c_cflag=CS8 | CSTOPB | CLOCAL | CREAD;
+        newtio.c_lflag=0;
+        newtio.c_cc[VTIME]=0;
+        newtio.c_cc[VMIN]=0;
+        if (tcsetattr(fd,TCSANOW,&newtio)==-1) {
+                close(fd);
+				#ifdef DEBUG
+					printf("port setting error\n");
+				#endif
+        }
+        tcflush(fd,TCIFLUSH);
+        tcflush(fd,TCOFLUSH);
+		#ifdef DEBUG
+			printf("port settings done\n");
+		#endif
+		}
+
+}
+
+
+void dmxusb_send_dmx(){
+	int i;
+	int CRC=0;
+	size=MAXCHANNELS;
+
+	buffer[0]=PACKET_START;
+	buffer[1]=SEND_DMX;
+	buffer[2]=(size) & 0x00ff;
+	buffer[3]=((size) >> 8) & 0x00ff;	
+	buffer[4]=buffer[0]+buffer[1]+buffer[2]+buffer[3];
+	memcpy(&buffer[5],dmx,size);
+	for (i=0;i<5+size;i++) CRC+=buffer[i];
+	  buffer[5+size]=(CRC & 0x00ff);
+	#ifdef DEBUG
+		printf("dmx out writted: %d\n",write(fd,buffer,6+size));
+	#endif
+
+}
 void conf(){
 //set correct fixture type
 fixture++;
@@ -383,7 +458,7 @@ unsigned long timeGetTime() {
 }
 
 
-int do_step(artnet_node node) { //loop for DMX sending
+int do_step() { //loop for DMX sending
 
 if (program_step != 0|| current_program != 0) { //send DMX only if any program is active
 
@@ -422,9 +497,13 @@ if (program_step != 0|| current_program != 0) { //send DMX only if any program i
 	  msleep(40); //sleep why? (as per example from artnet libs)
 	  
 	  //send DMX
-	  if (artnet_send_dmx(node,0,MAXCHANNELS, dmx)){
-      printf("failed to send: %s\n", artnet_strerror() );
-	  }
+	  #ifdef ARTNET
+		if (artnet_send_dmx(node,0,MAXCHANNELS, dmx)){
+			printf("failed to send: %s\n", artnet_strerror() );
+		}
+	  #else
+		dmxusb_send_dmx(dmx,MAXCHANNELS);
+	  #endif
 	  msleep(40); //sleep dtto
 
 
@@ -523,6 +602,7 @@ int main()
   int bcast_limit = 0;
   int an_sd;
 
+#ifdef ARTNET
 
   /* set up artnet node */
   node = artnet_new(ip_addr, verbose);;
@@ -554,6 +634,11 @@ int main()
 
   // store the sds
   an_sd = artnet_get_sd(node); //all as per examples
+#else
+
+	dmxusb_open_port();
+
+#endif
 
 	int c = 0;
 	char strr[3];
@@ -737,7 +822,7 @@ int main()
 					}
 					
 			draw_screen(); //draw screen UI each loop after user input
-			do_step(node); //send DMX loop
+			do_step(); //send DMX loop
 			refresh();     //refresh screen
 		}
 	 return 0;
