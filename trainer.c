@@ -36,6 +36,7 @@ struct termios oldtio,newtio;
 unsigned char buffer[1024];
 int size;
 int fd;
+
 //#define ARTNET
 //#define DEBUG 
 
@@ -228,6 +229,17 @@ const char *c_temp[] = {
 	"8000 Theatre",
 };
 
+void dmxusb_mute_dmx(){
+
+	buffer[0]=PACKET_START;
+	buffer[1]=STOP_DMX_RDM;
+	buffer[2]=0;
+	buffer[3]=0;
+	buffer[4]=buffer[0]+buffer[1]+buffer[2]+buffer[3];
+	buffer[5]=buffer[4]+buffer[4];
+	write(fd,buffer,6);
+}
+
 
 void dmxusb_open_port(){
 
@@ -282,6 +294,8 @@ void dmxusb_send_dmx(){
 	  buffer[5+size]=(CRC & 0x00ff);
 	#ifdef DEBUG
 		printf("dmx out writted: %d\n",write(fd,buffer,6+size));
+	#else
+		write(fd,buffer,6+size);
 	#endif
 
 }
@@ -518,6 +532,9 @@ if (program_step != 0|| current_program != 0) { //send DMX only if any program i
 		current_step=0;
 		nodelay(w,FALSE);
 	    mvwprintw(w,14,1,"Finished                                 ");
+		#ifndef ARTNET
+			dmxusb_mute_dmx();
+		#endif
 
 	}
   
@@ -588,7 +605,11 @@ void cleanup() { //on exit
 		resetty();
 		endwin();
 	}
-  artnet_stop(node);
+	#ifdef ARTNET
+	  artnet_stop(node);
+	#else
+	 dmxusb_mute_dmx();
+	#endif
 }
 
 
