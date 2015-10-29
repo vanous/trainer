@@ -37,7 +37,7 @@ unsigned char buffer[1024];
 int size;
 int fd;
 
-//#define ARTNET
+#define ARTNET
 //#define DEBUG 
 
 int calib[8][4]; // calibration values
@@ -90,26 +90,16 @@ unsigned char dmx[512]; //dmx array
 
 
 //           program,step,values
-static int program[4][32][70]={
+static int program[5][32][70]={
 //first step is defining #of steps in program and delay time in ms for each step
 
 
 //test program, pan/tilt movement
 
-{
-{6,0,20,20,20,20,20,20},//number of steps, delay for each step
-{10,10},
-{30,30},
-{40,40},
-{128,0,128,0},
-{255,0,255,0},
-{128,0,128,0},
-{0,0}
-}
+{}
 ,
 {//DLX M1 The OFF 8000  4200     3200     2700   ON   8000     5600    4200   OFF   5600
-{31,40,40,40,40,10,100,10,10,100,10,10,60,10,10,60,10,40,10,60,10,10,60,10,10,60,10,60,10,60,10,40}, //number of steps, delay for each step
-{0,0,0,0,0,21,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},//8000K WhitePoint ON (shutter off, 3sec)
+{30,40,40,40,10,100,10,10,100,10,10,60,10,10,60,10,40,10,60,10,10,60,10,10,60,10,60,10,60,10,40}, //number of steps, delay for each step
 {0,0,0,0,0,21,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},//8000K WhitePoint ON (shutter off, 3sec)
 {0,0,0,0,0,31,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},//RGBW mixing ON (shutter off, 3sec)
 {0,0,0,0,0,240,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,255,255,255,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},//Theater mode OFF (3sec)
@@ -143,8 +133,7 @@ static int program[4][32][70]={
 }
 ,
 {//DLS
-{31,40,40,40,40,10,40,10,10,40,10,10,40,10,10,40,10,40,10,40,10,10,40,10,10,40,10,40,10,40,10,40}, //number of steps, delay for each step
-{0,0,0,0,0,21,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},//8000K WhitePoint ON (shutter off, 3sec)
+{30,40,40,40,10,40,10,10,40,10,10,40,10,10,40,10,40,10,40,10,10,40,10,10,40,10,40,10,40,10,40}, //number of steps, delay for each step
 {0,0,0,0,0,21,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},//8000K WhitePoint ON (shutter off, 3sec)
 {0,0,0,0,0,31,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},//RGBW mixing ON (shutter off, 3sec)
 {0,0,0,0,0,240,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,255,255,255,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},//Theater mode OFF (3sec)
@@ -179,8 +168,7 @@ static int program[4][32][70]={
 
 
 {//DLF
-{31,40,40,40,40,10,40,10,10,40,10,10,40,10,10,40,10,40,10,40,10,10,40,10,10,40,10,40,10,40,10,40}, //number of steps, delay for each step
-{0,0,0,0,0,21,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},//8000K WhitePoint ON (shutter off, 3sec)
+{30,40,40,40,10,40,10,10,40,10,10,40,10,10,40,10,40,10,40,10,10,40,10,10,40,10,40,10,40,10,40}, //number of steps, delay for each step
 {0,0,0,0,0,21,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},//8000K WhitePoint ON (shutter off, 3sec)
 {0,0,0,0,0,31,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},//RGBW mixing ON (shutter off, 3sec)
 {0,0,0,0,0,240,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,255,255,255,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},//Theater mode OFF (3sec)
@@ -212,7 +200,15 @@ static int program[4][32][70]={
 {0,0,0,0,0,0,11,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,255,255,255,0,0,0,0,0,540,541,542,543,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},//back to 0 ,
 {128,0,128,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}//end,,
 }
-
+,
+{
+{5,20,20,20,20,20},//number of steps, delay for each step
+{0,0},
+{128,0,128,0},
+{255,0,255,0},
+{128,0,128,0},
+{0,0}
+}
 };
 
 
@@ -243,7 +239,7 @@ void dmxusb_mute_dmx(){
 
 void dmxusb_open_port(){
 
-fd=open("/dev/ttyUSB0",O_RDWR | O_NOCTTY);
+fd=open("/dev/ttyUSB1",O_RDWR | O_NOCTTY);
 	if (fd<0) {
 		//chyba otevreni portu
 		#ifdef DEBUG
@@ -315,7 +311,7 @@ for(a=0; a<512; a++)
 	{
 		if (a<70) //really only analyze first 70 channels of each DMX packet
 		{	
-		int cur_val=program[current_program][current_step+1][a]; //our program values. re-write them by calibration values where value is 500 - indicating the slot
+		int cur_val=program[current_program][program_step][a]; //our program values. re-write them by calibration values where value is 500 - indicating the slot
 		if (cur_val>499){
 			if (cur_val < 510)
 			{
@@ -474,9 +470,8 @@ unsigned long timeGetTime() {
 
 int do_step() { //loop for DMX sending
 
-if (program_step != 0|| current_program != 0) { //send DMX only if any program is active
+if (current_program != 0) { //send DMX only if any program is active
 
-	fill_dmx(); //fill in 
 	
   if (program_step!=current_step){ //new step
   
@@ -508,6 +503,7 @@ if (program_step != 0|| current_program != 0) { //send DMX only if any program i
 	//print program progress
 	mvwprintw(w,14,1,"%s, Step: %01d of %01d (Time %03d of %03d)", fixtures_print[fixture],current_step,program_length, (tend-timeGetTime())/60,final);
 		
+	  fill_dmx(); //fill in 
 	  msleep(40); //sleep why? (as per example from artnet libs)
 	  
 	  //send DMX
@@ -528,6 +524,7 @@ if (program_step != 0|| current_program != 0) { //send DMX only if any program i
   
 	program_step++;
 	if (program_step > program_length){ //end of program
+		current_program=0;
 		program_step=0;
 		current_step=0;
 		nodelay(w,FALSE);
@@ -557,7 +554,7 @@ void draw_screen() { //draw user interface
 	init_pair(8, 174,238) ;
 
 	attron(COLOR_PAIR(1));
-	mvwprintw(w,0,1,"%s", "  TRAINER  artneT calibRAtIoN submittER  ");
+	mvwprintw(w,0,1,"%s", "  TRAINER     The calibRAtIoN submittER  ");
 	attron(COLOR_PAIR(8));
 	mvwprintw(w,1,1,      "                                         ");
 	mvwprintw(w,1,(45-strlen(fixtures_print[fixture]))/2, "%s", fixtures_print[fixture]);
@@ -635,7 +632,7 @@ int main()
 
   // set names and node type
   artnet_set_short_name(node, "TRAINER");
-  artnet_set_long_name(node, "artneT calibRAtIoN submittER");
+  artnet_set_long_name(node, "The calibRAtIoN submittER");
   artnet_set_node_type(node, ARTNET_SRV);
 
   artnet_set_subnet_addr(node, subnet_addr);
@@ -714,28 +711,34 @@ int main()
 				else if (event.y==12){ //row of command buttons
 						if ((event.x>0) && (event.x<11)){
 								get_input(menu_r,menu_c,strr,calib[menu_r][menu_c]);
-						} else if ((event.x>11) && (event.x<18)){
+						} else if ((event.x>11) && (event.x<18)){ //run
 							if (fixture){
 								nodelay(w,TRUE);
 								current_program=fixture;
-								program_step=1;
-								current_step=0;
+								program_step=0;
+								current_step=-1;
 								program_length=program[current_program][0][0];
 							}else{ //fixture not selected, show error
 							
 								mvwprintw(w,14,(45-strlen(fixtures_print[fixture]))/2, "%s", fixtures_print[fixture]);
 							}
-						} else if ((event.x>18) && (event.x<26)){
+						} else if ((event.x>18) && (event.x<26)){ //test
 							if (fixture){
 								nodelay(w,TRUE);
-								current_program=0;
+								current_program=4;
 								current_step=0;
-								program_step=1;
+								program_step=-1;
 								program_length=program[current_program][0][0];
 							}else{ //fixture not selected, show error
 							
 								mvwprintw(w,14,(45-strlen(fixtures_print[fixture]))/2, "%s", fixtures_print[fixture]);
 							}
+						} else if ((event.x>26) && (event.x<34)){ //stop
+							current_program=0;
+							current_step=-1;
+							program_step=0;
+							nodelay(w,FALSE); //reenable getch
+							//mvwprintw(w,14,1,"Stopped                                  ");
 						} else if ((event.x>34) && (event.x<42)){
 							return 0;
 						}
@@ -808,7 +811,7 @@ int main()
 			  case 's': //stop program
 					//setall();
 					current_program=0;
-					current_step=0;
+					current_step=-1;
 					program_step=0;
 					nodelay(w,FALSE); //reenable getch
 	    			//mvwprintw(w,14,1,"Stopped                                  ");
@@ -816,9 +819,9 @@ int main()
 			  case 't': //run test program
 					if (fixture){
 					nodelay(w,TRUE);//disable getch while running
-					current_program=0;
-					program_step=1;
-					current_step=0;
+					current_program=4;
+					program_step=0;
+					current_step=-1;
 					program_length=program[current_program][0][0];
 					}else{ //fixture not selected, show error
 						mvwprintw(w,14,(45-strlen(fixtures_print[fixture]))/2, "%s", fixtures_print[fixture]);
@@ -829,7 +832,7 @@ int main()
 					nodelay(w,TRUE);
 					current_program=fixture;
 					program_step=0;
-					current_step=0;
+					current_step=-1;
 					program_length=program[current_program][0][0];
 					}else{ //fixture not selected, show error
 					
