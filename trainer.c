@@ -7,11 +7,13 @@
 #include <string.h>
 #include <fcntl.h>
 #ifndef WIN32
+#include <termios.h>
 #include <sys/wait.h>
 #include <sys/time.h>
 #else
 #include <winsock2.h>
-#include <windows.h>
+//#include <windows.h>
+#include "serialport.c" //includes windows.h
 #endif
 #include <time.h>
 #include <getopt.h>
@@ -22,7 +24,6 @@
 #include <string.h>
 #include <fcntl.h>
 #include <unistd.h>
-#include <termios.h>
 
 #define INFO 0x14
 #define PACKET_START 0xA5
@@ -32,12 +33,19 @@
 #define SNIFFER 0x34
 
 
-struct termios oldtio,newtio;
+#ifndef WIN32
+	struct termios oldtio,newtio;
+#endif
+
 unsigned char buffer[1024];
 int size;
 int fd;
 
-#define ARTNET
+#ifdef WIN32
+	HANDLE h; //serial port
+#endif
+
+//#define ARTNET
 //#define DEBUG 
 
 int calib[8][4]; // calibration values
@@ -233,21 +241,31 @@ void dmxusb_mute_dmx(){
 	buffer[3]=0;
 	buffer[4]=buffer[0]+buffer[1]+buffer[2]+buffer[3];
 	buffer[5]=buffer[4]+buffer[4];
+#ifndef WIN32
 	write(fd,buffer,6);
+#else
+	writeToSerialPort(h,buffer,6);
+#endif
 }
 
 
 void dmxusb_open_port(){
-
-fd=open("/dev/ttyUSB1",O_RDWR | O_NOCTTY);
+#ifndef WIN32
+	fd=open("/dev/ttyUSB0",O_RDWR | O_NOCTTY);
 	if (fd<0) {
 		//chyba otevreni portu
 		#ifdef DEBUG
 			printf("chyba otevreni portu");
 		#endif
 
-		}else{
-		
+	}
+
+#else
+	h = openSerialPort("COM3",B19200,one,off);
+
+	Sleep(100);
+#endif
+#ifndef WIN32
 		#ifdef DEBUG
 			printf("port ready\n");
 		#endif
@@ -270,7 +288,7 @@ fd=open("/dev/ttyUSB1",O_RDWR | O_NOCTTY);
 		#ifdef DEBUG
 			printf("port settings done\n");
 		#endif
-		}
+#endif	
 
 }
 
@@ -293,6 +311,11 @@ void dmxusb_send_dmx(){
 	#else
 		write(fd,buffer,6+size);
 	#endif
+#ifndef WIN32
+		write(fd,buffer,6+size);
+#else
+	writeToSerialPort(h,buffer,size+6);
+#endif
 
 }
 void conf(){
@@ -606,6 +629,11 @@ void cleanup() { //on exit
 	  artnet_stop(node);
 	#else
 	 dmxusb_mute_dmx();
+#ifndef WIN32
+	tcsetattr(fd,TCSANOW,&oldtio);
+#else
+	closeSerialPort(h);
+#endif
 	#endif
 }
 
