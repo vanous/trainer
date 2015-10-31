@@ -45,6 +45,7 @@ void ErrorExit(LPTSTR lpszFunction)
 	*/
 HANDLE openSerialPort(LPCSTR portname,enum Baudrate baudrate, enum Stopbits stopbits, enum Paritycheck parity)
 {
+	int fail = 0;
 	DWORD  accessdirection =GENERIC_READ | GENERIC_WRITE;
 	HANDLE hSerial = CreateFile(portname,
 		accessdirection,
@@ -54,19 +55,22 @@ HANDLE openSerialPort(LPCSTR portname,enum Baudrate baudrate, enum Stopbits stop
 		0,
 		0);
 	if (hSerial == INVALID_HANDLE_VALUE) {
-		ErrorExit("CreateFile");
+		//ErrorExit("CreateFile");
+		fail = 1;
 	}
 	DCB dcbSerialParams = {0};
 	dcbSerialParams.DCBlength=sizeof(dcbSerialParams);
 	if (!GetCommState(hSerial, &dcbSerialParams)) {
-		 ErrorExit("GetCommState");
+		 //ErrorExit("GetCommState");
+		 fail =1;
 	}
 	dcbSerialParams.BaudRate=baudrate;
 	dcbSerialParams.ByteSize=8;
 	dcbSerialParams.StopBits=stopbits;
 	dcbSerialParams.Parity=parity;
 	if(!SetCommState(hSerial, &dcbSerialParams)){
-		 ErrorExit("SetCommState");
+		 //ErrorExit("SetCommState");
+		 fail=1;
 	}
 	COMMTIMEOUTS timeouts={0};
 	timeouts.ReadIntervalTimeout=50;
@@ -75,9 +79,16 @@ HANDLE openSerialPort(LPCSTR portname,enum Baudrate baudrate, enum Stopbits stop
 	timeouts.WriteTotalTimeoutConstant=50;
 	timeouts.WriteTotalTimeoutMultiplier=10;
 	if(!SetCommTimeouts(hSerial, &timeouts)){
-		ErrorExit("SetCommTimeouts");
+		//ErrorExit("SetCommTimeouts");
+		fail=1;
+
 	}
-	return hSerial;
+
+	if(fail){
+		return 0;
+	}else{
+		return hSerial;
+		}
 }
 
 /**
@@ -91,9 +102,11 @@ DWORD readFromSerialPort(HANDLE hSerial, char * buffer, int buffersize)
 {
     DWORD dwBytesRead = 0;
     if(!ReadFile(hSerial, buffer, buffersize, &dwBytesRead, NULL)){
-        ErrorExit("ReadFile");
-    }
-    return dwBytesRead;
+        //ErrorExit("ReadFile");
+		return 0;
+    }else{
+		return dwBytesRead;
+	}
 }
 
 /**
@@ -107,9 +120,11 @@ DWORD writeToSerialPort(HANDLE hSerial, char * data, int length)
 {
 	DWORD dwBytesRead = 0;
 	if(!WriteFile(hSerial, data, length, &dwBytesRead, NULL)){
-		ErrorExit("WriteFile");
-	}
-	return dwBytesRead;
+		//ErrorExit("WriteFile");
+		return 0;
+	}else{
+		return dwBytesRead;
+		}
 }
 
 void closeSerialPort(HANDLE hSerial)

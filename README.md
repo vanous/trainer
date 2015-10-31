@@ -4,9 +4,9 @@ The calibRAtIoN submittER
 
 It requires libartnet but in reality, calibration can only happen via RUI or RUNIT WTX. One could, however, use another Robin fixture for Art-Net to XLR DMX translation.
 
-To build trainer, you need libartnet, ncurses, configure, make, make install.
+To build trainer, you need libartnet, ncurses. Simply configure, make, make install.
 
-Then build:
+Then build trainer:
 
 gcc -O2 trainer.c -lncurses -lartnet  -o trainer
 
@@ -49,7 +49,7 @@ Build:
 make; make install
 
 
-Make trainer:
+Build trainer:
 
 For win32:
 

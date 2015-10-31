@@ -3,17 +3,18 @@
 #include <ncurses.h>			/* ncurses.h includes stdio.h */  
 //#include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
 #include <string.h>
 #include <fcntl.h>
 #ifndef WIN32
 #include <termios.h>
 #include <sys/wait.h>
 #include <sys/time.h>
+#include <sys/ioctl.h>
 #else
 #include <winsock2.h>
 //#include <windows.h>
 #include "serialport.c" //includes windows.h
+#include <io.h>
 #endif
 #include <time.h>
 #include <getopt.h>
@@ -24,22 +25,23 @@
 #include <string.h>
 #include <fcntl.h>
 #include <unistd.h>
+#include <sys/stat.h>
+
 
 #define INFO 0x14
+#define RDM_UID 0x24
 #define PACKET_START 0xA5
 #define SEND_DMX 6
 #define STOP_DMX_RDM 8
 #define DMX_IN 4
 #define SNIFFER 0x34
-
-
 #ifndef WIN32
 	struct termios oldtio,newtio;
 #endif
 
 unsigned char buffer[1024];
 int size;
-int fd;
+int fd=-1;
 
 #ifdef WIN32
 	HANDLE h; //serial port
@@ -63,6 +65,9 @@ DLF
 };
 
 enum fixtures fixture = NONE;
+
+int serial_port;
+unsigned char serial_alias[20];
 
 const char* fixtures_print[] = {
 "press c to configure fixture",
@@ -248,10 +253,9 @@ void dmxusb_mute_dmx(){
 #endif
 }
 
-
-void dmxusb_open_port(){
+void dmxusb_open_port(char *serial_name){
 #ifndef WIN32
-	fd=open("/dev/ttyUSB0",O_RDWR | O_NOCTTY);
+	fd=open(serial_name,O_RDWR | O_NOCTTY);
 	if (fd<0) {
 		//chyba otevreni portu
 		#ifdef DEBUG
@@ -261,7 +265,7 @@ void dmxusb_open_port(){
 	}
 
 #else
-	h = openSerialPort("COM3",B19200,one,off);
+	h = openSerialPort(serial_name,B19200,one,off);
 
 	Sleep(100);
 #endif
@@ -293,6 +297,150 @@ void dmxusb_open_port(){
 }
 
 
+int file_exist (char *filename)
+{
+  struct stat status;   
+  return (stat(filename, &status) == 0);
+}
+
+
+int get_uid(){
+
+	buffer[0]=PACKET_START;
+	buffer[1]=RDM_UID;
+	buffer[2]=0;
+	buffer[3]=0;
+	buffer[4]=buffer[0]+buffer[1]+buffer[2]+buffer[3];
+	buffer[5]=buffer[4]+buffer[4];
+	
+	
+	#ifndef WIN32
+		write(fd,buffer,6+size);
+		struct timespec tim, tim2;
+		tim.tv_sec = 0;
+		tim.tv_nsec = 100000000L;
+		nanosleep(&tim,&tim2);
+	#else
+	    writeToSerialPort(h,buffer,size+6);
+		Sleep(100);
+	#endif
+	
+
+
+int success=0;
+int bytes;
+
+#ifndef WIN32
+fd_set read_fds, write_fds, except_fds;
+FD_ZERO(&read_fds);
+FD_ZERO(&write_fds);
+FD_ZERO(&except_fds);
+FD_SET(fd, &read_fds);
+
+
+struct timeval timeout;
+timeout.tv_sec = 1;
+timeout.tv_usec = 0;
+if (select(fd + 1, &read_fds, &write_fds, &except_fds, &timeout)>0)
+{
+//printf("select OK\n");
+if (FD_ISSET(fd, &read_fds)) {
+	ioctl(fd, FIONREAD, &bytes);
+				unsigned char data[bytes];
+				//printf("bytes ready: %d\n",bytes);
+				read(fd,data,bytes);
+				//printf("read bytes: %d\n",read(fd,data,bytes));
+				if (data[0]==0xa5){
+					if (data[1]==0x25){
+						success=1;
+						if(data[7]==0x02){
+							sprintf(serial_alias,"RUNIT WTX");
+						}
+						else if(data[7]==0x01){
+							sprintf(serial_alias,"RUI");
+						}
+					}}
+
+
+}
+
+}
+#else
+			bytes=11;
+			unsigned char data[bytes];
+			//printf("bytes ready: %d\n",bytes);
+			readFromSerialPort(h,data,bytes);
+			//printf("read bytes: %d\n",read(fd,data,bytes));
+			if (data[0]==0xa5){
+				if (data[1]==0x25){
+					success=1;
+					if(data[7]==0x02){
+							sprintf(serial_alias,"RUNIT WTX");
+					}
+					else if(data[7]==0x01){
+							sprintf(serial_alias,"RUI");
+					}
+				}}
+
+
+
+
+#endif
+
+    // fd is ready for reading
+
+else
+{
+    // timeout or error
+	//printf("error\n");
+}
+return success;
+}
+
+
+void find_port(){
+
+int i=0;
+char serial_name[20];
+
+#ifdef WIN32
+i=3;
+#endif
+
+for (i;i<10;i++){
+
+#ifdef WIN32
+	sprintf(serial_name,"COM%d",i);
+#else
+	sprintf(serial_name,"/dev/ttyUSB%d",i);
+#endif
+
+int id;
+		printf("testing port %s\n",serial_name);
+	if (file_exist(serial_name))
+{
+		printf("opening port %s\n",serial_name);
+		dmxusb_open_port(serial_name);
+		id=get_uid();
+		
+		if (id){ //0 OK, 1 fail
+			printf("found port: %s\n", serial_name);
+			printf("found device: %s\n",serial_alias);
+			break;
+		
+		}
+		
+
+}
+
+
+
+
+	}
+
+}
+
+
 void dmxusb_send_dmx(){
 	int i;
 	int CRC=0;
@@ -311,11 +459,11 @@ void dmxusb_send_dmx(){
 	#else
 		write(fd,buffer,6+size);
 	#endif
-#ifndef WIN32
+	#ifndef WIN32
 		write(fd,buffer,6+size);
-#else
-	writeToSerialPort(h,buffer,size+6);
-#endif
+	#else
+	    writeToSerialPort(h,buffer,size+6);
+	#endif
 
 }
 void conf(){
@@ -324,6 +472,7 @@ fixture++;
 if (fixture>3){
 fixture=1;
 }
+
 }
 
 void fill_dmx()
@@ -413,6 +562,8 @@ void init_calib(){
 			}
 			}
 }
+
+
 
 void get_input(int r,int c,char * str,int msg) //get user input for each calibration value
 {
@@ -629,11 +780,11 @@ void cleanup() { //on exit
 	  artnet_stop(node);
 	#else
 	 dmxusb_mute_dmx();
-#ifndef WIN32
-	tcsetattr(fd,TCSANOW,&oldtio);
-#else
-	closeSerialPort(h);
-#endif
+		#ifndef WIN32
+			tcsetattr(fd,TCSANOW,&oldtio);
+		#else
+			closeSerialPort(h);
+		#endif
 	#endif
 }
 
@@ -682,7 +833,10 @@ int main()
   an_sd = artnet_get_sd(node); //all as per examples
 #else
 
-	dmxusb_open_port();
+	//dmxusb_open_port();
+	//printf("hledam port");
+	//mvwprintw(w,18,1,"hledam port");
+	find_port();
 
 #endif
 
@@ -830,6 +984,7 @@ int main()
 					if (program_step==0){
 					conf();
 						}
+					mvwprintw(w,14,1,"                                         ");
 					break;
 			  case '\n': //enter
 
