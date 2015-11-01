@@ -68,6 +68,9 @@ enum fixtures fixture = NONE;
 
 int serial_port;
 unsigned char serial_alias[20];
+char serial_name[20];
+
+int uid; //is DEVICE detected?
 
 const char* fixtures_print[] = {
 "press c to configure fixture",
@@ -355,7 +358,8 @@ if (FD_ISSET(fd, &read_fds)) {
 						success=1;
 						if(data[7]==0x02){
 							sprintf(serial_alias,"RUNIT WTX");
-						}
+	
+	}
 						else if(data[7]==0x01){
 							sprintf(serial_alias,"RUI");
 						}
@@ -401,7 +405,6 @@ return success;
 void find_port(){
 
 int i=0;
-char serial_name[20];
 
 #ifdef WIN32
 i=3;
@@ -415,15 +418,14 @@ for (i;i<10;i++){
 	sprintf(serial_name,"/dev/ttyUSB%d",i);
 #endif
 
-int id;
 		printf("testing port %s\n",serial_name);
 	if (file_exist(serial_name))
 {
 		printf("opening port %s\n",serial_name);
 		dmxusb_open_port(serial_name);
-		id=get_uid();
+		uid=get_uid();
 		
-		if (id){ //0 OK, 1 fail
+		if (uid){ //0 OK, 1 fail
 			printf("found port: %s\n", serial_name);
 			printf("found device: %s\n",serial_alias);
 			break;
@@ -862,6 +864,13 @@ int main()
 	MEVENT event;
 	init_calib(); //fill calibrations with 128s
 	draw_screen();//draw UI
+	char e=' ';
+	#ifdef ARTNET
+		sprintf(serial_alias,"Art-Net");
+	#endif
+
+	mvwprintw(w,14,1,"                                         ");
+	mvwprintw(w,14,1,"%s %s",uid ? serial_name:"", serial_alias);
 		/* main loop */
 		c=0;
 		while (c!='q') {
