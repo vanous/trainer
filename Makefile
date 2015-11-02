@@ -1,4 +1,4 @@
-#not so elegant ut makes the job
+#not so elegant but makes the job
 
 CCFLAGS += -O2
 

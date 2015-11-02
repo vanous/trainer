@@ -268,7 +268,9 @@ void dmxusb_open_port(char *serial_name){
 	}
 
 #else
+	printf("inside open port: %s",serial_name);
 	h = openSerialPort(serial_name,B19200,one,off);
+	//h = openSerialPort(serial_name,B9600,one,off);
 
 	Sleep(100);
 #endif
@@ -372,7 +374,7 @@ if (FD_ISSET(fd, &read_fds)) {
 #else
 			bytes=11;
 			unsigned char data[bytes];
-			//printf("bytes ready: %d\n",bytes);
+			//printf("reding bytes ready: %d\n",bytes);
 			readFromSerialPort(h,data,bytes);
 			//printf("read bytes: %d\n",read(fd,data,bytes));
 			if (data[0]==0xa5){
@@ -410,10 +412,14 @@ int i=0;
 i=3;
 #endif
 
-for (i;i<10;i++){
+for (i;i<255;i++){
 
 #ifdef WIN32
-	sprintf(serial_name,"COM%d",i);
+	if (i<10){
+		sprintf(serial_name,"COM%d",i);
+	}else{
+		sprintf(serial_name,"\\\\.\\COM%d",i);
+	}
 #else
 	sprintf(serial_name,"/dev/ttyUSB%d",i);
 #endif
@@ -430,9 +436,31 @@ for (i;i<10;i++){
 			printf("found device: %s\n",serial_alias);
 			break;
 		
+		}else{
+			printf("UID failed");
+		
 		}
+
 		
 
+}else{
+
+#ifdef WIN32
+
+		printf("opening port %s\n",serial_name);
+		dmxusb_open_port(serial_name);
+		uid=get_uid();
+		
+		if (uid){ //0 OK, 1 fail
+			printf("found port: %s\n", serial_name);
+			printf("found device: %s\n",serial_alias);
+			break;
+		
+		}else{
+			printf("UID failed");
+		
+		}
+#endif
 }
 
 
@@ -835,8 +863,8 @@ int main()
   an_sd = artnet_get_sd(node); //all as per examples
 #else
 
-	//dmxusb_open_port();
-	//printf("hledam port");
+	//dmxusb_open_port("\\\\.\\COM35");
+	//get_uid();
 	//mvwprintw(w,18,1,"hledam port");
 	find_port();
 
