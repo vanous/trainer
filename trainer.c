@@ -47,7 +47,7 @@ int fd=-1;
 	HANDLE h; //serial port
 #endif
 
-//#define ARTNET
+#define ARTNET
 //#define DEBUG 
 
 int calib[8][4]; // calibration values
@@ -67,10 +67,10 @@ DLF
 enum fixtures fixture = NONE;
 
 int serial_port;
-unsigned char serial_alias[20];
+unsigned char serial_alias[42]="...searching...";
 char serial_name[20];
 
-int uid; //is DEVICE detected?
+int uid=0; //is DEVICE detected?
 
 const char* fixtures_print[] = {
 "press c to configure fixture",
@@ -268,11 +268,11 @@ void dmxusb_open_port(char *serial_name){
 	}
 
 #else
-	printf("inside open port: %s",serial_name);
+	//printf("inside open port: %s",serial_name);
 	h = openSerialPort(serial_name,B19200,one,off);
 	//h = openSerialPort(serial_name,B9600,one,off);
 
-	Sleep(100);
+	//Sleep(100);
 #endif
 #ifndef WIN32
 		#ifdef DEBUG
@@ -404,15 +404,53 @@ return success;
 }
 
 
+
+void init_artnet()
+
+{
+
+  char *ip_addr = NULL;
+  int optc, subnet_addr = 0, port_addr = 0;
+  int bcast_limit = 0;
+  int an_sd;
+  /* set up artnet node */
+  node = artnet_new(ip_addr, verbose);;
+  
+  if(node == NULL) {
+	printf ("Unable to set up artnet node: %s\n", artnet_strerror() );
+ //return 1;
+  }
+
+  // set names and node type
+  artnet_set_short_name(node, "TRAINER");
+  artnet_set_long_name(node, "The calibRAtIoN submittER");
+  artnet_set_node_type(node, ARTNET_SRV);
+
+  artnet_set_subnet_addr(node, subnet_addr);
+
+  // enable the first input port (1 universe only)
+  artnet_set_port_type(node, 0, ARTNET_ENABLE_INPUT, ARTNET_PORT_DMX);
+  artnet_set_port_addr(node, 0, ARTNET_INPUT_PORT, port_addr);
+  artnet_set_bcast_limit(node, bcast_limit);
+
+  //start the node
+  //artnet_start(node);
+  if (artnet_start(node) != ARTNET_EOK) {
+    printf("Failed to start: %s\n", artnet_strerror() );
+    //goto error_destroy;
+//	return 1;
+  }
+
+  // store the sds
+  an_sd = artnet_get_sd(node); //all as per examples
+}
+
+
 void find_port(){
 
-int i=0;
+static int i=0; //port iterator
 
-#ifdef WIN32
-i=3;
-#endif
-
-for (i;i<255;i++){
+if ((i<255) && (!uid)){
 
 #ifdef WIN32
 	if (i<10){
@@ -420,53 +458,64 @@ for (i;i<255;i++){
 	}else{
 		sprintf(serial_name,"\\\\.\\COM%d",i);
 	}
+
+		printf(".");
+		//printf("opening port %s\n",serial_name);
+		dmxusb_open_port(serial_name);
+		uid=get_uid();
+		
+		if (uid){ //>0
+			printf("\n");
+			printf("found port: %s\n", serial_name);
+			printf("found device: %s\n",serial_alias);
+			mvwprintw(w,14,1,"                                         ");
+			mvwprintw(w,14,1,"%s %s",uid ? serial_name:"", serial_alias);
+	//		break;
+		
+		}else{
+			//printf("UID failed");
+		
+		}
 #else
 	sprintf(serial_name,"/dev/ttyUSB%d",i);
-#endif
-
-		printf("testing port %s\n",serial_name);
 	if (file_exist(serial_name))
-{
-		printf("opening port %s\n",serial_name);
+		{
+		//printf("opening port %s\n",serial_name);
 		dmxusb_open_port(serial_name);
 		uid=get_uid();
 		
-		if (uid){ //0 OK, 1 fail
+		if (uid){ //>0
+			printf("\n");
 			printf("found port: %s\n", serial_name);
 			printf("found device: %s\n",serial_alias);
-			break;
+			mvwprintw(w,14,1,"                                         ");
+			mvwprintw(w,14,1,"%s %s",uid ? serial_name:"", serial_alias);
+	//		break;
 		
 		}else{
-			printf("UID failed");
+			//printf("UID failed");
 		
 		}
 
-		
-
-}else{
-
-#ifdef WIN32
-
-		printf("opening port %s\n",serial_name);
-		dmxusb_open_port(serial_name);
-		uid=get_uid();
-		
-		if (uid){ //0 OK, 1 fail
-			printf("found port: %s\n", serial_name);
-			printf("found device: %s\n",serial_alias);
-			break;
-		
-		}else{
-			printf("UID failed");
-		
-		}
-#endif
 }
 
-
-
-
+#endif
+i++;	
+	}else{
+	if (!uid){ //uid should be 0 if no serial
+		#ifdef ARTNET
+			sprintf(serial_alias,"Art-Net Output enabled");
+			mvwprintw(w,14,1,"                                         ");
+			mvwprintw(w,14,1,"%s",serial_alias);
+			init_artnet();
+			uid=1;
+		#else
+			sprintf(serial_alias,"No DMX device found and Art-Net disabled");			
+			mvwprintw(w,14,1,"                                         ");
+			mvwprintw(w,14,1,"%s",serial_alias);
+		#endif
 	}
+}
 
 }
 
@@ -597,6 +646,7 @@ void init_calib(){
 
 void get_input(int r,int c,char * str,int msg) //get user input for each calibration value
 {
+	nodelay(w,FALSE); //reenable getch
 	echo(); // print characters as typed
 	curs_set(2); // show cursor
 	mvwprintw(w,r+3,c+19+(c*4),"%s","      ");
@@ -645,6 +695,8 @@ void get_input(int r,int c,char * str,int msg) //get user input for each calibra
 
 	noecho();   //edit is over, set terminal back to non edit mode - catch single char in main loop
 	curs_set(0);
+	nodelay(w,TRUE); //reenable getch
+
 }
 
 void msleep(long time) {
@@ -716,7 +768,9 @@ if (current_program != 0) { //send DMX only if any program is active
 			printf("failed to send: %s\n", artnet_strerror() );
 		}
 	  #else
+		if(uid){
 		dmxusb_send_dmx(dmx,MAXCHANNELS);
+		}
 	  #endif
 	  msleep(40); //sleep dtto
 
@@ -731,7 +785,7 @@ if (current_program != 0) { //send DMX only if any program is active
 		current_program=0;
 		program_step=0;
 		current_step=0;
-		nodelay(w,FALSE);
+		//nodelay(w,FALSE);
 	    mvwprintw(w,14,1,"Finished                                 ");
 		#ifndef ARTNET
 			dmxusb_mute_dmx();
@@ -819,56 +873,17 @@ void cleanup() { //on exit
 }
 
 
-
 int main()
 {
 
 
-  char *ip_addr = NULL;
-  int optc, subnet_addr = 0, port_addr = 0;
-  int bcast_limit = 0;
-  int an_sd;
 
-#ifdef ARTNET
 
-  /* set up artnet node */
-  node = artnet_new(ip_addr, verbose);;
-  
-  if(node == NULL) {
-	printf ("Unable to set up artnet node: %s\n", artnet_strerror() );
- return 1;
-  }
-
-  // set names and node type
-  artnet_set_short_name(node, "TRAINER");
-  artnet_set_long_name(node, "The calibRAtIoN submittER");
-  artnet_set_node_type(node, ARTNET_SRV);
-
-  artnet_set_subnet_addr(node, subnet_addr);
-
-  // enable the first input port (1 universe only)
-  artnet_set_port_type(node, 0, ARTNET_ENABLE_INPUT, ARTNET_PORT_DMX);
-  artnet_set_port_addr(node, 0, ARTNET_INPUT_PORT, port_addr);
-  artnet_set_bcast_limit(node, bcast_limit);
-
-  //start the node
-  //artnet_start(node);
-  if (artnet_start(node) != ARTNET_EOK) {
-    printf("Failed to start: %s\n", artnet_strerror() );
-    //goto error_destroy;
-	return 1;
-  }
-
-  // store the sds
-  an_sd = artnet_get_sd(node); //all as per examples
-#else
-
+	find_port();
 	//dmxusb_open_port("\\\\.\\COM35");
 	//get_uid();
 	//mvwprintw(w,18,1,"hledam port");
-	find_port();
 
-#endif
 
 	int c = 0;
 	char strr[3];
@@ -893,10 +908,8 @@ int main()
 	init_calib(); //fill calibrations with 128s
 	draw_screen();//draw UI
 	char e=' ';
-	#ifdef ARTNET
-		sprintf(serial_alias,"Art-Net");
-	#endif
 
+	nodelay(w,TRUE);
 	mvwprintw(w,14,1,"                                         ");
 	mvwprintw(w,14,1,"%s %s",uid ? serial_name:"", serial_alias);
 		/* main loop */
@@ -932,7 +945,7 @@ int main()
 								get_input(menu_r,menu_c,strr,calib[menu_r][menu_c]);
 						} else if ((event.x>11) && (event.x<18)){ //run
 							if (fixture){
-								nodelay(w,TRUE);
+								//nodelay(w,TRUE);
 								current_program=fixture;
 								program_step=0;
 								current_step=-1;
@@ -943,7 +956,7 @@ int main()
 							}
 						} else if ((event.x>18) && (event.x<26)){ //test
 							if (fixture){
-								nodelay(w,TRUE);
+								//nodelay(w,TRUE);
 								current_program=4;
 								current_step=0;
 								program_step=-1;
@@ -956,7 +969,7 @@ int main()
 							current_program=0;
 							current_step=-1;
 							program_step=0;
-							nodelay(w,FALSE); //reenable getch
+							//nodelay(w,FALSE); //reenable getch
 							//mvwprintw(w,14,1,"Stopped                                  ");
 						} else if ((event.x>34) && (event.x<42)){
 							return 0;
@@ -1033,12 +1046,12 @@ int main()
 					current_program=0;
 					current_step=-1;
 					program_step=0;
-					nodelay(w,FALSE); //reenable getch
+					//nodelay(w,FALSE); //reenable getch
 	    			//mvwprintw(w,14,1,"Stopped                                  ");
 					break;
 			  case 't': //run test program
 					if (fixture){
-					nodelay(w,TRUE);//disable getch while running
+					//nodelay(w,TRUE);//disable getch while running
 					current_program=4;
 					program_step=0;
 					current_step=-1;
@@ -1049,7 +1062,7 @@ int main()
 					break;
 			  case 'r': //run
 					if (fixture){
-					nodelay(w,TRUE);
+					//nodelay(w,TRUE);
 					current_program=fixture;
 					program_step=0;
 					current_step=-1;
@@ -1064,7 +1077,7 @@ int main()
 						break;
 
 					}
-					
+			find_port();				
 			draw_screen(); //draw screen UI each loop after user input
 			do_step(); //send DMX loop
 			refresh();     //refresh screen
