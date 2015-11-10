@@ -7,6 +7,9 @@ LIBS += -lncurses -lartnet
 trainer:
 	$(CC) trainer.c $(CCFLAGS) $(LIBS) -o $@
 
+trainer-static:
+	$(CC) trainer.c $(CCFLAGS) -lncurses /lib/libartnet.a -o $@
+
 win32:
 	i686-w64-mingw32-gcc -O2 -v trainer.c -o trainer_w32.exe -std=gnu11 -static -mwindows -I /home/vanous/bin/projects/c/win/win32/include/artnet/ -I /home/vanous/bin/projects/c/win/win32/include/ncurses/ /home/vanous/bin/projects/c/win/win32/lib/libartnet.dll.a  /home/vanous/bin/projects/c/win/win32/lib/libncurses.a
 

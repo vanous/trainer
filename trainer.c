@@ -26,6 +26,7 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <sys/stat.h>
+#include <glob.h> //file
 
 
 #define INFO 0x14
@@ -450,7 +451,14 @@ void find_port(){
 
 static int i=0; //port iterator
 
-if ((i<255) && (!uid)){
+
+#ifdef WIN32
+	#define ITER 100
+#else
+	#define ITER 1
+#endif
+
+if ((i<ITER) && (!uid)){
 
 #ifdef WIN32
 	if (i<10){
@@ -465,9 +473,11 @@ if ((i<255) && (!uid)){
 		uid=get_uid();
 		
 		if (uid){ //>0
-			printf("\n");
-			printf("found port: %s\n", serial_name);
-			printf("found device: %s\n",serial_alias);
+			#ifdef DEBUG
+				printf("\n");
+				printf("found port: %s\n", serial_name);
+				printf("found device: %s\n",serial_alias);
+			#endif
 			mvwprintw(w,14,1,"                                         ");
 			mvwprintw(w,14,1,"%s %s",uid ? serial_name:"", serial_alias);
 	//		break;
@@ -477,7 +487,19 @@ if ((i<255) && (!uid)){
 		
 		}
 #else
-	sprintf(serial_name,"/dev/ttyUSB%d",i);
+	
+	glob_t glob_result;
+	#ifdef __APPLE__
+		glob("/dev/cu.usbserial*",GLOB_TILDE,NULL,&glob_result);
+	#else
+		glob("/dev/ttyUSB*",GLOB_TILDE,NULL,&glob_result);
+	#endif
+
+printf("number of serial ports: %d\n",glob_result.gl_pathc);
+unsigned int j=0; 
+	while (j<glob_result.gl_pathc){ //iterate fast on UNIX as we have stat and can fail quickly
+	sprintf(serial_name,"%s",glob_result.gl_pathv[j]);
+	j++;
 	if (file_exist(serial_name))
 		{
 		//printf("opening port %s\n",serial_name);
@@ -485,19 +507,22 @@ if ((i<255) && (!uid)){
 		uid=get_uid();
 		
 		if (uid){ //>0
-			printf("\n");
-			printf("found port: %s\n", serial_name);
-			printf("found device: %s\n",serial_alias);
+			#ifdef DEBUG
+				printf("\n");
+				printf("found port: %s\n", serial_name);
+				printf("found device: %s\n",serial_alias);
+			#endif
 			mvwprintw(w,14,1,"                                         ");
 			mvwprintw(w,14,1,"%s %s",uid ? serial_name:"", serial_alias);
-	//		break;
+			break;
 		
 		}else{
 			//printf("UID failed");
 		
 		}
 
-}
+		}
+	}
 
 #endif
 i++;	
