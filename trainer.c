@@ -6,6 +6,7 @@
 #include <string.h>
 #include <fcntl.h>
 #ifndef WIN32
+#include <glob.h> //find /dev/files
 #include <termios.h>
 #include <sys/wait.h>
 #include <sys/time.h>
@@ -26,7 +27,6 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <sys/stat.h>
-#include <glob.h> //file
 
 
 #define INFO 0x14

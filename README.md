@@ -64,6 +64,6 @@ Serial library for windows comes from: https://github.com/waynix/SPinGW
 
 Obligatory screenshot:
 
-![trainer](https://cloud.githubusercontent.com/assets/3680926/10712981/aa143b58-7aab-11e5-9ca8-b8eb8b8094d7.png)
+![trainer](https://cloud.githubusercontent.com/assets/3680926/10994533/3f0ed888-8477-11e5-8948-1deddb98b092.png)
 
 
