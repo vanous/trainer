@@ -69,7 +69,7 @@ enum fixtures fixture = NONE;
 
 int serial_port;
 unsigned char serial_alias[42]="...searching...";
-char serial_name[20];
+char serial_name[40];
 
 int uid=0; //is DEVICE detected?
 
@@ -771,7 +771,8 @@ if (current_program != 0) { //send DMX only if any program is active
 
 			tallend=tstart+(sum*100.0);
 	}
-  if (t<=tend) {
+
+  if (t<=tend) { //not a new step, keep sending until time is up
     t=timeGetTime();
 
     int final = (tallend-timeGetTime())/600;
