@@ -91,7 +91,8 @@ unsigned long tstart;
 unsigned long tend;
 unsigned long tallend;
 unsigned long t;
-
+int sum=0;
+int tsum=0;
 
 #ifndef DEBUG
 	int verbose = 0;
@@ -221,9 +222,9 @@ static int program[5][32][70]={
 {
 {5,20,20,20,20,20},//number of steps, delay for each step
 {0,0},
-{128,0,128,0},
-{255,0,255,0},
-{128,0,128,0},
+{121,0,128,0},
+{254,0,255,0},
+{122,0,128,0},
 {0,0}
 }
 };
@@ -763,19 +764,23 @@ if (current_program != 0) { //send DMX only if any program is active
 			tend=tstart+(int)(fadetime*100.0);
 			t=tstart;
 
-			float sum=0;
-
+			sum = 0;
 			for (int i = program_step; i < program_length+1; i++) {
 			   sum += program[current_program][0][i];
 				 }
 
 			tallend=tstart+(sum*100.0);
+			
+			if (current_step==1)
+				tsum=(int)sum;
+
 	}
 
   if (t<=tend) { //not a new step, keep sending until time is up
     t=timeGetTime();
 
-    int final = (tallend-timeGetTime())/600;
+    int finalm = (tallend-timeGetTime())/6;
+    int final = (tallend-timeGetTime())/100;
 	
 	if (final < 0)
 	{
@@ -783,7 +788,21 @@ if (current_program != 0) { //send DMX only if any program is active
 	}
 
 	//print program progress
-	mvwprintw(w,14,1,"%s, Step: %01d of %01d (Time %03d of %03d)", fixtures_print[fixture],current_step,program_length, (tend-timeGetTime())/60,final);
+
+//	move(14,0);
+//	attron(COLOR_PAIR(1));
+	//int percent=((tsum/6)-final-(tend-timeGetTime())/60)*100/(int)(tsum/6);
+	//int percent=((tsum/6)-final)*100/(int)(tsum/6);
+	int percent=((tsum)-final)*100/tsum;
+	//int percent=((tsum)-final);
+
+	//mvwprintw(w,14,1,"%s, Step %02d of %02d (Time %03d of %03d) %03i", fixtures_print[fixture],current_step,program_length, (tend-timeGetTime())/60,final,percent);
+	//mvwprintw(w,14,1,"%s, Step %02d of %02d (Time %03d of %03d) %03i", fixtures_print[fixture],current_step,program_length, tsum,final,percent);
+	mvwprintw(w,14,1,"%s, Step %02d of %02d                   %03i%%", fixtures_print[fixture],current_step,program_length,percent);
+
+
+	move(14,0.42*percent);
+	chgat(42, COLOR_PAIR(1), 0, NULL);
 		
 	  fill_dmx(); //fill in 
 	  msleep(40); //sleep why? (as per example from artnet libs)
@@ -973,7 +992,7 @@ int main()
 							if (fixture){
 								//nodelay(w,TRUE);
 								current_program=fixture;
-								program_step=0;
+								program_step=1;
 								current_step=-1;
 								program_length=program[current_program][0][0];
 							}else{ //fixture not selected, show error
@@ -984,8 +1003,8 @@ int main()
 							if (fixture){
 								//nodelay(w,TRUE);
 								current_program=4;
-								current_step=0;
-								program_step=-1;
+								current_step=-1;
+								program_step=1;
 								program_length=program[current_program][0][0];
 							}else{ //fixture not selected, show error
 							
@@ -994,7 +1013,7 @@ int main()
 						} else if ((event.x>26) && (event.x<34)){ //stop
 							current_program=0;
 							current_step=-1;
-							program_step=0;
+							program_step=1;
 							//nodelay(w,FALSE); //reenable getch
 							//mvwprintw(w,14,1,"Stopped                                  ");
 						} else if ((event.x>34) && (event.x<42)){
@@ -1071,7 +1090,7 @@ int main()
 					//setall();
 					current_program=0;
 					current_step=-1;
-					program_step=0;
+					program_step=1;
 					//nodelay(w,FALSE); //reenable getch
 	    			//mvwprintw(w,14,1,"Stopped                                  ");
 					break;
@@ -1079,7 +1098,7 @@ int main()
 					if (fixture){
 					//nodelay(w,TRUE);//disable getch while running
 					current_program=4;
-					program_step=0;
+					program_step=1;
 					current_step=-1;
 					program_length=program[current_program][0][0];
 					}else{ //fixture not selected, show error
@@ -1090,7 +1109,7 @@ int main()
 					if (fixture){
 					//nodelay(w,TRUE);
 					current_program=fixture;
-					program_step=0;
+					program_step=1;
 					current_step=-1;
 					program_length=program[current_program][0][0];
 					}else{ //fixture not selected, show error
