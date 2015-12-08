@@ -48,7 +48,7 @@ int fd=-1;
 	HANDLE h; //serial port
 #endif
 
-//#define ARTNET
+#define ARTNET
 //#define DEBUG 
 
 int calib[8][4]; // calibration values
@@ -534,7 +534,7 @@ i++;
 			mvwprintw(w,14,1,"                                         ");
 			mvwprintw(w,14,1,"%s",serial_alias);
 			init_artnet();
-			uid=1;
+			uid=10;
 		#else
 			sprintf(serial_alias,"No DMX device found and Art-Net disabled");			
 			mvwprintw(w,14,1,"                                         ");
@@ -807,15 +807,17 @@ if (current_program != 0) { //send DMX only if any program is active
 	  msleep(40); //sleep why? (as per example from artnet libs)
 	  
 	  //send DMX
+		if (uid==10) { //10 is artnet identifier
 	  #ifdef ARTNET
 		if (artnet_send_dmx(node,0,MAXCHANNELS, dmx)){
 			printf("failed to send: %s\n", artnet_strerror() );
 		}
-	  #else
+	  #endif
+		}else{
 		if(uid){
 		dmxusb_send_dmx(dmx,MAXCHANNELS);
 		}
-	  #endif
+		}
 	  msleep(40); //sleep dtto
 
 
@@ -947,7 +949,7 @@ int main()
 	raw();
 	keypad(w, TRUE);
 	mousemask(ALL_MOUSE_EVENTS, NULL); //accept mouse events
-
+	//cbreak();
 	MEVENT event;
 	init_calib(); //fill calibrations with 128s
 	draw_screen();//draw UI
