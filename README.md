@@ -6,21 +6,21 @@ It requires libartnet but in reality, calibration can only happen via RUI or RUN
 
 To build trainer, you need libartnet, ncurses. Simply configure, make, make install.
 
-Then build trainer:
+##Then build trainer:
 
 gcc -O2 trainer.c -lncurses -lartnet  -o trainer
 
-Build on Linux for win32 and win64:
+###Build on Linux for win32 and win64:
 
 get ncurses: ftp://invisible-island.net/ncurses/ncurses-6.0.tar.gz
 
 Configure:
 
-For win32:
+###For win32:
 
 ./configure --enable-term-driver --enable-sp-funcs --host=i686-w64-mingw32 --prefix=/home/vanous/bin/projects/c/win/win32/
 
-For win64:
+###For win64:
 
 /configure --enable-term-driver --enable-sp-funcs --host=x86_64-w64-mingw32 --prefix=/home/vanous/bin/projects/c/win/win64/
 
@@ -59,6 +59,8 @@ For win64:
 
 x86_64-w64-mingw32-gcc -O2 -v trainer.c -o trainer_w64.exe -std=gnu11 -I /home/vanous/bin/projects/c/win/win64/include/artnet/ -I /home/vanous/bin/projects/c/win/win64/include/ncurses/ /home/vanous/bin/projects/c/win/win64/lib/libartnet.a /home/vanous/bin/projects/c/win/win64/lib/libncurses.a
 
+##Binary releases:
+https://github.com/vanous/trainer/releases
 
 Serial library for windows comes from: https://github.com/waynix/SPinGW
 
