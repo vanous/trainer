@@ -15,10 +15,10 @@ trainer-static: make_dir
 	$(CC) trainer.c $(CCFLAGS) -lncurses /lib/libartnet.a -o ./bin/$@
 
 win32: make_dir
-	i686-w64-mingw32-gcc -O2 -v trainer.c -o ./bin/trainer_w32.exe -std=gnu11 -static -mwindows -I /home/vanous/bin/projects/c/win/win32/include/artnet/ -I /home/vanous/bin/projects/c/win/win32/include/ncurses/ /home/vanous/bin/projects/c/win/win32/lib/libartnet.dll.a  /home/vanous/bin/projects/c/win/win32/lib/libncurses.a
+	i686-w64-mingw32-gcc -O2 -v trainer.c -o ./bin/trainer_w32.exe -std=gnu11 -I /home/vanous/bin/projects/c/win/win32/include/artnet/ -I /home/vanous/bin/projects/c/win/win32/include/ncurses/ /home/vanous/bin/projects/c/win/win32/lib/libartnet.dll.a  /home/vanous/bin/projects/c/win/win32/lib/libncurses.a
 
 win64: make_dir
-	x86_64-w64-mingw32-gcc -O2 -v trainer.c -o ./bin/trainer_w64.exe -std=gnu11 -static -mwindows -I /home/vanous/bin/projects/c/win/win64/include/artnet/ -I /home/vanous/bin/projects/c/win/win64/include/ncurses/ /home/vanous/bin/projects/c/win/win64/lib/libartnet.dll.a /home/vanous/bin/projects/c/win/win64/lib/libncurses.a
+	x86_64-w64-mingw32-gcc -O2 -v trainer.c -o ./bin/trainer_w64.exe -std=gnu11 -I /home/vanous/bin/projects/c/win/win64/include/artnet/ -I /home/vanous/bin/projects/c/win/win64/include/ncurses/ /home/vanous/bin/projects/c/win/win64/lib/libartnet.dll.a /home/vanous/bin/projects/c/win/win64/lib/libncurses.a
 
 osx: make_dir
 	gcc trainer.c -lncurses -I../libs/include/artnet/ ../libs/lib/libartnet.a -o ./bin/trainer-osx
