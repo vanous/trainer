@@ -744,7 +744,8 @@ unsigned long timeGetTime() {
 #else
   SYSTEMTIME st;
   GetSystemTime(&st);
-  return (unsigned long)st.wSecond*1000UL + (unsigned long)st.wMilliseconds;
+  //return (unsigned long)st.wSecond*1000UL + (unsigned long)st.wMilliseconds;
+  return (unsigned long) st.wHour*3600*1000UL + st.wMinute*60*1000UL + st.wSecond*1000UL + (unsigned long)st.wMilliseconds;
 #endif
 }
 
