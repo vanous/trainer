@@ -479,8 +479,8 @@ if ((i<ITER) && (!uid)){
 				printf("found port: %s\n", serial_name);
 				printf("found device: %s\n",serial_alias);
 			#endif
-			mvwprintw(w,14,1,"                                         ");
-			mvwprintw(w,14,1,"%s %s",uid ? serial_name:"", serial_alias);
+			mvwprintw(w,13,1,"                                         ");
+			mvwprintw(w,13,1,"%s %s",uid ? serial_name:"", serial_alias);
 	//		break;
 		
 		}else{
@@ -513,8 +513,8 @@ unsigned int j=0;
 				printf("found port: %s\n", serial_name);
 				printf("found device: %s\n",serial_alias);
 			#endif
-			mvwprintw(w,14,1,"                                         ");
-			mvwprintw(w,14,1,"%s %s",uid ? serial_name:"", serial_alias);
+			mvwprintw(w,13,1,"                                         ");
+			mvwprintw(w,13,1,"%s %s",uid ? serial_name:"", serial_alias);
 			break;
 		
 		}else{
@@ -531,14 +531,14 @@ i++;
 	if (!uid){ //uid should be 0 if no serial
 		#ifdef ARTNET
 			sprintf(serial_alias,"Art-Net Output enabled");
-			mvwprintw(w,14,1,"                                         ");
-			mvwprintw(w,14,1,"%s",serial_alias);
+			mvwprintw(w,13,1,"                                         ");
+			mvwprintw(w,13,1,"%s",serial_alias);
 			init_artnet();
 			uid=10;
 		#else
 			sprintf(serial_alias,"No DMX device found and Art-Net disabled");			
-			mvwprintw(w,14,1,"                                         ");
-			mvwprintw(w,14,1,"%s",serial_alias);
+			mvwprintw(w,13,1,"                                         ");
+			mvwprintw(w,13,1,"%s",serial_alias);
 		#endif
 	}
 }
@@ -790,7 +790,7 @@ if (current_program != 0) { //send DMX only if any program is active
 
 //printf("pl: %d\n",program_length);
 //	move(14,0);
-//	attron(COLOR_PAIR(1));
+	attron(COLOR_PAIR(1));
 	//int percent=((tsum/6)-final-(tend-timeGetTime())/60)*100/(int)(tsum/6);
 	//int percent=((tsum/6)-final)*100/(int)(tsum/6);
 	int percent=((tsum)-final)*100/tsum;
@@ -849,27 +849,32 @@ void draw_screen() { //draw user interface
 	int i=0,x,y,z;
 
 	// color schemas
-	init_pair(1, 174, 232);
+	init_pair(1, COLOR_WHITE, COLOR_YELLOW);
 	init_pair(2, COLOR_RED, COLOR_GREEN);
 	init_pair(3, COLOR_RED, COLOR_WHITE);
 	init_pair(4, COLOR_GREEN, COLOR_WHITE);
 	init_pair(5, COLOR_BLUE, COLOR_WHITE);
 	init_pair(6, COLOR_BLACK, COLOR_WHITE);
 	init_pair(7, 244, COLOR_WHITE);
-	init_pair(8, 174,238) ;
+	init_pair(8, COLOR_CYAN,COLOR_BLACK) ;
+	init_pair(9, COLOR_GREEN, COLOR_BLACK);
 
-	attron(COLOR_PAIR(1));
+	attron(COLOR_PAIR(5));
 	mvwprintw(w,0,1,"%s", "  TRAINER     The calibRAtIoN submittER  ");
 	attron(COLOR_PAIR(8));
+	attron(A_BOLD);
 	mvwprintw(w,1,1,      "                                         ");
 	mvwprintw(w,1,(45-strlen(fixtures_print[fixture]))/2, "%s", fixtures_print[fixture]);
+	attroff(A_BOLD);
+	attron(COLOR_PAIR(9));
 	mvwprintw(w,2,1,"%s", " Color Temperature  Red Green Blue White ");
 	  
 	for(y=0; y<sizeof(c_temp)/sizeof(*c_temp); y+=1) //calibration values array UI
 		{
 
 		  move(y+3,1);
-			attron(COLOR_PAIR(7));
+			attron(COLOR_PAIR(6));
+			//attron(A_UNDERLINE);
 			addstr(" ");
 			addstr(c_temp[y]);
 			addstr("      ");
@@ -885,10 +890,11 @@ void draw_screen() { //draw user interface
 				}
 			addstr("  ");
 			}
-	
+		//attroff(A_UNDERLINE);	
 	// bottom buttons
 		
 	attron(COLOR_PAIR(8));
+	attron(A_BOLD);
 	mvwprintw(w,12,1,"%s", "Entr: Edit");
 //	attron(COLOR_PAIR(8));
     //mvprintw(12,10,"%s", "");
@@ -898,6 +904,7 @@ void draw_screen() { //draw user interface
 	mvwprintw(w,12,27,"%s", "s: Stop");
 //	attron(COLOR_PAIR(8));
 	mvwprintw(w,12,35,"%s", "q: Quit");
+	attroff(A_BOLD);
 		}
 
 
@@ -958,8 +965,8 @@ int main()
 	
 	//nodelay(w,TRUE);
 	timeout(50); //prevent 100% cpu usage during idle loop
-	mvwprintw(w,14,1,"                                         ");
-	mvwprintw(w,14,1,"%s %s",uid ? serial_name:"", serial_alias);
+	mvwprintw(w,13,1,"                                         ");
+	mvwprintw(w,13,1,"%s %s",uid ? serial_name:"",serial_alias);
 		/* main loop */
 		c=0;
 		while (c!='q') {
