@@ -1,4 +1,5 @@
 #not so elegant but makes the job
+#take screenshot gif: byzanz-record -x 1 -y 131 -w 774 -h 525 --delay=2 -c -d 16 /tmp/trainer.gif
 
 CCFLAGS += -O2
 
