@@ -860,7 +860,17 @@ void draw_screen() { //draw user interface
 	init_pair(9, COLOR_GREEN, COLOR_BLACK);
 
 	attron(COLOR_PAIR(5));
-	mvwprintw(w,0,1,"%s", "  TRAINER     The calibRAtIoN submittER  ");
+	mvwprintw(w,0,1,"%s", "  TRAINER     The calibration submitter  ");
+	attron(COLOR_PAIR(6));
+	attron(A_BOLD);
+	mvwprintw(w,0,15,"%s", "T");
+	mvwprintw(w,0,24,"%s", "ra");
+	mvwprintw(w,0,27,"%s", "i");
+	mvwprintw(w,0,29,"%s", "n");
+	mvwprintw(w,0,38,"%s", "er");
+
+
+
 	attron(COLOR_PAIR(8));
 	attron(A_BOLD);
 	mvwprintw(w,1,1,      "                                         ");
