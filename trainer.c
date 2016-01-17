@@ -415,11 +415,13 @@ void init_artnet()
   int optc, subnet_addr = 0, port_addr = 0;
   int bcast_limit = 0;
   int an_sd;
+  char error_msg[40];
   /* set up artnet node */
   node = artnet_new(ip_addr, verbose);;
-  
   if(node == NULL) {
-	printf ("Unable to set up artnet node: %s\n", artnet_strerror() );
+	sprintf(error_msg,"Unable to start Art-Net");
+	mvwprintw(w,13,1,"                                         ");
+	mvwprintw(w,13,1,"%s",error_msg);
  //return 1;
   }
 
@@ -438,7 +440,10 @@ void init_artnet()
   //start the node
   //artnet_start(node);
   if (artnet_start(node) != ARTNET_EOK) {
-    printf("Failed to start: %s\n", artnet_strerror() );
+	sprintf(error_msg,"Failed to start Art-Net");
+	mvwprintw(w,13,1,"                                         ");
+	mvwprintw(w,13,1,"%s",error_msg);
+    //printf("Failed to start: %s\n", artnet_strerror() );
     //goto error_destroy;
 //	return 1;
   }
@@ -530,7 +535,7 @@ i++;
 	}else{
 	if (!uid){ //uid should be 0 if no serial
 		#ifdef ARTNET
-			sprintf(serial_alias,"Art-Net Output enabled");
+			sprintf(serial_alias,"Enabling Art-Net Output");
 			mvwprintw(w,13,1,"                                         ");
 			mvwprintw(w,13,1,"%s",serial_alias);
 			init_artnet();
