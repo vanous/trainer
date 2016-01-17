@@ -6,8 +6,8 @@ CCFLAGS += -O2
 LIBS += -lncurses -lartnet
 
 make_dir:
-	mkdir ./bin
-	mkdir ./release
+	mkdir -p ./bin
+	mkdir -p ./release
 
 trainer: make_dir
 	$(CC) trainer.c $(CCFLAGS) $(LIBS) -o ./bin/$@
