@@ -419,7 +419,7 @@ void init_artnet()
   /* set up artnet node */
   node = artnet_new(ip_addr, verbose);;
   if(node == NULL) {
-	sprintf(error_msg,"Unable to start Art-Net");
+	sprintf(error_msg,"Error: Unable to start Art-Net");
 	mvwprintw(w,13,1,"                                         ");
 	mvwprintw(w,13,1,"%s",error_msg);
  //return 1;
@@ -440,7 +440,7 @@ void init_artnet()
   //start the node
   //artnet_start(node);
   if (artnet_start(node) != ARTNET_EOK) {
-	sprintf(error_msg,"Failed to start Art-Net");
+	sprintf(error_msg,"Error: Failed to start Art-Net");
 	mvwprintw(w,13,1,"                                         ");
 	mvwprintw(w,13,1,"%s",error_msg);
     //printf("Failed to start: %s\n", artnet_strerror() );
@@ -815,8 +815,15 @@ if (current_program != 0) { //send DMX only if any program is active
 	  //send DMX
 		if (uid==10) { //10 is artnet identifier
 	  #ifdef ARTNET
+
+		char error_msg[40];
 		if (artnet_send_dmx(node,0,MAXCHANNELS, dmx)){
-			printf("failed to send: %s\n", artnet_strerror() );
+			//printf("failed to send: %s\n", artnet_strerror() );
+		
+			sprintf(error_msg,"Error: Unable to send Art-Net data");
+			mvwprintw(w,13,1,"                                         ");
+			mvwprintw(w,13,1,"%s",error_msg);
+		
 		}
 	  #endif
 		}else{
