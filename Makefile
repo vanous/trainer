@@ -33,7 +33,7 @@ clean:
 all: clean trainer trainer-static win32 win64 
 
 package_osx:
-	gzip ./bin/trainer-osx > ./release/trainer-osx.gz
+	gzip -c ./bin/trainer-osx > ./release/trainer-osx.gz
 
 package_all: all
 	gzip < ./bin/trainer > ./release/trainer.gz
