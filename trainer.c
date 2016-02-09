@@ -289,7 +289,7 @@ void dmxusb_open_port(char *serial_name){
         newtio.c_cc[VTIME]=0;
         newtio.c_cc[VMIN]=0;
         if (tcsetattr(fd,TCSANOW,&newtio)==-1) {
-                close(fd);
+                //close(fd); //OSX failure, temporarily disabled
 				#ifdef DEBUG
 					printf("port setting error\n");
 				#endif
@@ -508,7 +508,7 @@ unsigned int j=0;
 	j++;
 	if (file_exist(serial_name))
 		{
-		//printf("opening port %s\n",serial_name);
+		printf("opening port %s\n",serial_name);
 		dmxusb_open_port(serial_name);
 		uid=get_uid();
 		
