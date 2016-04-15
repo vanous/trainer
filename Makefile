@@ -9,10 +9,10 @@ make_dir:
 	mkdir -p ./bin
 	mkdir -p ./release
 
-trainer: make_dir
+trainer_linux: make_dir
 	$(CC) trainer.c $(CCFLAGS) $(LIBS) -o ./bin/$@
 
-trainer-static: make_dir
+trainer_linux_static: make_dir
 	$(CC) trainer.c $(CCFLAGS) -lncurses /lib/libartnet.a -o ./bin/$@
 
 win32: make_dir
@@ -22,7 +22,7 @@ win64: make_dir
 	x86_64-w64-mingw32-gcc -O2 -v trainer.c -o ./bin/trainer_w64.exe -std=gnu11 -I /home/vanous/bin/projects/c/win/win64/include/artnet/ -I /home/vanous/bin/projects/c/win/win64/include/ncurses/ /home/vanous/bin/projects/c/win/win64/lib/libartnet.dll.a /home/vanous/bin/projects/c/win/win64/lib/libncurses.a
 
 osx: make_dir
-	gcc trainer.c -lncurses -I../libs/include/artnet/ ../libs/lib/libartnet.a -o ./bin/trainer-osx
+	gcc trainer.c -lncurses -I../libs/include/artnet/ ../libs/lib/libartnet.a -o ./bin/trainer_osx
 
 clean:
 	rm -f .*.o .*.d 
@@ -30,13 +30,13 @@ clean:
 	rm -rf ./release
 
 
-all: clean trainer trainer-static win32 win64 
+all: clean trainer_linux trainer_linux_static win32 win64 
 
 package_osx:
-	gzip -c ./bin/trainer-osx > ./release/trainer-osx.gz
+	gzip -c ./bin/trainer_osx > ./release/trainer_osx.gz
 
 package_all: all
-	gzip < ./bin/trainer > ./release/trainer.gz
-	gzip < ./bin/trainer-static > ./release/trainer-static.gz
-	zip --junk-paths ./release/trainer-w32.zip /home/vanous/bin/projects/c/win/win32/bin/libartnet-1.dll ./bin/trainer_w32.exe
-	zip --junk-paths ./release/trainer-w64.zip /home/vanous/bin/projects/c/win/win64/bin/libartnet-1.dll ./bin/trainer_w64.exe
+	gzip < ./bin/trainer_linux > ./release/trainer_linux.gz
+	gzip < ./bin/trainer_linux_static > ./release/trainer_linux_static.gz
+	zip --junk-paths ./release/trainer_w32.zip /home/vanous/bin/projects/c/win/win32/bin/libartnet-1.dll ./bin/trainer_w32.exe
+	zip --junk-paths ./release/trainer_w64.zip /home/vanous/bin/projects/c/win/win64/bin/libartnet-1.dll ./bin/trainer_w64.exe
