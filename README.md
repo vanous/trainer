@@ -24,7 +24,7 @@ Obligatory screenshot:
 
 ![trainer](https://cloud.githubusercontent.com/assets/3680926/11918539/19d9e56c-a736-11e5-8eac-7ffb18d246d8.gif)
 
-It requires libartnet but in reality, calibration can only happen via RUI or RUNIT WTX. One could, however, use another Robin fixture for Art-Net to XLR DMX translation.
+It requires libartnet but in reality, calibration can only happen via RUI or RUNIT WTX. One could, however, use another Robin fixture for Art-Net to XLR DMX translation. Get latest trainer here: https://github.com/vanous/trainer/releases/latest 
 
 Serial library for windows comes from: https://github.com/waynix/SPinGW
 
