@@ -75,9 +75,9 @@ int uid=0; //is DEVICE detected?
 
 const char* fixtures_print[] = {
 "press c to configure fixture",
-"DLX",
-"DLS",
-"DLF"
+"DL(4)X",
+"DL(4)S",
+"DL(4)F"
 };
 
 
