@@ -2,7 +2,7 @@
 
 The calibRAtIoN submittER
 
-It requires libartnet but in reality, calibration can only happen via RUI or RUNIT WTX. One could, however, use another Robin fixture for Art-Net to XLR DMX translation.
+Tool to quickly upload LED calibration values into Robin DL/DL4 units via RUNIT over DMX (Art-Net calibration not supported by the fixtures).
 
 ##Binary releases:
 https://github.com/vanous/trainer/releases
@@ -23,6 +23,8 @@ https://github.com/vanous/trainer/releases
 Obligatory screenshot:
 
 ![trainer](https://cloud.githubusercontent.com/assets/3680926/11918539/19d9e56c-a736-11e5-8eac-7ffb18d246d8.gif)
+
+It requires libartnet but in reality, calibration can only happen via RUI or RUNIT WTX. One could, however, use another Robin fixture for Art-Net to XLR DMX translation.
 
 Serial library for windows comes from: https://github.com/waynix/SPinGW
 
