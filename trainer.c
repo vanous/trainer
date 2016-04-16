@@ -871,14 +871,14 @@ void draw_screen() { //draw user interface
 	init_pair(9, COLOR_GREEN, COLOR_BLACK);
 
 	attron(COLOR_PAIR(5));
-	mvwprintw(w,0,1,"%s", "  TRAINER     The calibration submitter  ");
+	mvwprintw(w,0,1,"%s", "TRAINER   The calibration submitter  v0.9");
 	attron(COLOR_PAIR(6));
 	attron(A_BOLD);
-	mvwprintw(w,0,15,"%s", "T");
-	mvwprintw(w,0,24,"%s", "ra");
-	mvwprintw(w,0,27,"%s", "i");
-	mvwprintw(w,0,29,"%s", "n");
-	mvwprintw(w,0,38,"%s", "er");
+	mvwprintw(w,0,11,"%s", "T");
+	mvwprintw(w,0,20,"%s", "ra");
+	mvwprintw(w,0,23,"%s", "i");
+	mvwprintw(w,0,25,"%s", "n");
+	mvwprintw(w,0,34,"%s", "er");
 
 
 
