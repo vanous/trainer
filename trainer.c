@@ -802,7 +802,7 @@ if (current_program != 0) { //send DMX only if any program is active
 
 	//mvwprintw(w,14,1,"%s, Step %02d of %02d (Time %03d of %03d) %03i", fixtures_print[fixture],current_step,program_length, (tend-timeGetTime())/60,final,percent);
 	//mvwprintw(w,14,1,"%s, Step %02d of %02d (Time %03d of %03d) %03i", fixtures_print[fixture],current_step,program_length, tsum,final,percent);
-	mvwprintw(w,14,1,"%s, Step %02d of %02d                   %03i%%", fixtures_print[fixture],current_step,program_length,percent);
+	mvwprintw(w,14,1,"%s, Step %02d of %02d                %03i%%", fixtures_print[fixture],current_step,program_length,percent);
 
 
 	move(14,0.42*percent);
