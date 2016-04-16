@@ -32,7 +32,7 @@ clean:
 
 all: clean trainer_linux trainer_linux_static win32 win64 
 
-package_osx:
+package_osx: osx
 	gzip -c ./bin/trainer_osx > ./release/trainer_osx.gz
 	scp ./release/trainer_osx.gz vanous@192.168.3.37:/home/vanous/bin/projects/c/trainer/release
 
