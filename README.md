@@ -4,7 +4,7 @@ The calibRAtIoN submittER
 
 Tool to quickly upload LED calibration values into Robin DL/DL4 units via RUNIT over DMX (Art-Net calibration not supported by the fixtures).
 
-##Binary releases:
+##Binary releases (download):
 https://github.com/vanous/trainer/releases
 
 ##Quick howto:
